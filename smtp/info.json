@@ -1,0 +1,682 @@
+{
+  "name": "smtp",
+  "version": "3.0.0",
+  "label": "SMTP",
+  "description": "Send email via SMTP (stdlib smtplib, pydantic-validated, returns a structured result).",
+  "publisher": "Fortinet",
+  "cs_approved": true,
+  "cs_compatible": true,
+  "category": "utilities",
+  "help_online": "",
+  "icon_small_name": "smtp_small.png",
+  "icon_large_name": "smtp_large.png",
+  "configuration": {
+    "fields": [
+      {
+        "title": "HOST",
+        "name": "host",
+        "type": "text",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "description": "Specify the Hostname of the server to which you will connect and execute commands or python scripts."
+      },
+      {
+        "title": "PORT",
+        "name": "port",
+        "type": "text",
+        "value": "25",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "description": "Specify the Port number used for connecting to the server."
+      },
+      {
+        "title": "Default From",
+        "name": "default_from",
+        "value": "",
+        "type": "text",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "description": "Specify the default email address to be used for sending notifications, emails, etc."
+      },
+      {
+        "title": "Username",
+        "name": "username",
+        "type": "text",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "description": "Specify the username to access the server to which you will connect and execute commands or python scripts."
+      },
+      {
+        "title": "Password",
+        "name": "password",
+        "type": "password",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "description": "Specify the password to access the server to which you will connect and execute commands or python scripts."
+      },
+      {
+        "title": "Use TLS",
+        "name": "useTLS",
+        "value": false,
+        "type": "checkbox",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "description": "Specify the timeout value after which the connection to the server is dropped."
+      },
+      {
+        "title": "Use SSL",
+        "name": "useSSL",
+        "value": false,
+        "type": "checkbox",
+        "visible": true,
+        "editable": true,
+        "required": false,
+        "description": "Use implicit TLS (SMTPS, typically port 465). Mutually exclusive with Use TLS (STARTTLS)."
+      },
+      {
+        "title": "Timeout",
+        "name": "timeout",
+        "value": 10,
+        "type": "integer",
+        "visible": true,
+        "editable": true,
+        "required": true,
+        "description": "Specify the Port number used for connecting to the server.",
+        "validation": {
+          "minlength": 10,
+          "maxlength": 120
+        }
+      }
+    ]
+  },
+  "operations": [
+    {
+      "description": "Send an email with Jinja and email template support",
+      "operation": "send_email_new",
+      "annotation": "send_email_new",
+      "title": "Send Email (Advanced)",
+      "parameters": [
+        {
+          "title": "Recipient Type",
+          "name": "type",
+          "value": "Manual Input",
+          "type": "select",
+          "options": [
+            "Manual Input",
+            "User",
+            "Team"
+          ],
+          "visible": true,
+          "editable": true,
+          "required": true,
+          "description": "Choose the type of recipient for the email that you want to send. You have the ability to interchangeably send emails in multiple formats by specifying a comma-separated list of email addresses or selecting FortiSOAR\u2122 teams or users, or by reusing team or user information defined in previous playbook steps as Jinja statements.\nYou can choose from the following options: Manual Input, User, or Team.\nIf you choose Manual Input, then you can specify a comma-separated list of email addresses, including email addresses of non-FortiSOAR\u2122 users in the To, CC, and BCC fields. You can also specify the IRI values for users and/or teams, which allows users to reuse team or user information defined in previous playbook steps as Jinja statements.\nIf you choose User, then choose the 30 most recently created FortiSOAR\u2122 users by selecting users from a pre-populated drop-down list in the To, CC, and BCC fields, which enables users to dynamically leverage the email ID which has already been provided in a user record.\nIf you choose Team, then choose the 30 most recently created FortiSOAR\u2122 teams by selecting teams from a pre-populated drop-down list in the To, CC, and BCC fields, which enables users to dynamically leverage the email ID which has already been provided in a team record, and the email can be sent to all the members of the team at once.",
+          "tooltip": "You can choose to send emails to users and teams founded within FortiSOAR, or enter email addresses manually",
+          "onchange": {
+            "User": [
+              {
+                "title": "To",
+                "name": "to",
+                "type": "multiselect",
+                "apiOperation": "get_users",
+                "visible": true,
+                "editable": true,
+                "required": true
+              },
+              {
+                "title": "CC",
+                "name": "cc",
+                "type": "multiselect",
+                "apiOperation": "get_users",
+                "visible": true,
+                "editable": true,
+                "required": false
+              },
+              {
+                "title": "BCC",
+                "name": "bcc",
+                "type": "multiselect",
+                "apiOperation": "get_users",
+                "visible": true,
+                "editable": true,
+                "required": false
+              }
+            ],
+            "Team": [
+              {
+                "title": "To",
+                "name": "to",
+                "type": "multiselect",
+                "apiOperation": "get_teams",
+                "visible": true,
+                "editable": true,
+                "required": true
+              },
+              {
+                "title": "CC",
+                "name": "cc",
+                "type": "multiselect",
+                "apiOperation": "get_teams",
+                "visible": true,
+                "editable": true,
+                "required": false
+              },
+              {
+                "title": "BCC",
+                "name": "bcc",
+                "type": "multiselect",
+                "apiOperation": "get_teams",
+                "visible": true,
+                "editable": true,
+                "required": false
+              }
+            ],
+            "Manual Input": [
+              {
+                "title": "To",
+                "name": "to",
+                "value": "",
+                "type": "text",
+                "visible": true,
+                "editable": true,
+                "required": true,
+                "tooltip": "Comma separated list of email addresses, User IRIs or Team IRIs",
+                "placeholder": ""
+              },
+              {
+                "title": "CC",
+                "name": "cc",
+                "value": "",
+                "type": "text",
+                "visible": true,
+                "editable": true,
+                "required": false,
+                "tooltip": "Comma separated list of email addresses, User IRIs or Team IRIs",
+                "placeholder": ""
+              },
+              {
+                "title": "BCC",
+                "name": "bcc",
+                "value": "",
+                "type": "text",
+                "visible": true,
+                "editable": true,
+                "required": false,
+                "tooltip": "Comma separated list of email addresses, User IRIs or Team IRIs",
+                "placeholder": ""
+              }
+            ]
+          }
+        },
+        {
+          "title": "From",
+          "name": "from",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "description": "Specify the email address from which you want to send the email."
+        },
+        {
+          "title": "Body Type",
+          "name": "body_type",
+          "value": "Plain Text",
+          "type": "select",
+          "options": [
+            "Plain Text",
+            "Rich Text",
+            "Email Template"
+          ],
+          "visible": true,
+          "editable": true,
+          "required": true,
+          "description": "Select the format in which you want to send the email. You can choose from the following options: Plain Text, Rich Text, or Email Template.\nIf you choose Plain Text, then in the Content field, you can specify only plain text.\nIf you choose Rich Text, then in the Content field, you can add formatted content, images, and even custom jinja expressions using Dynamic Values.\nIf you choose Email Template, then the Email Template drop-down list is displayed, using which you can select the template that you want to use to send the email. An existing email template is passed as an input for the email subject and body (content) allowing you to leverage an existing email template and build upon it, thereby, avoiding re-work and ensuring consistency.",
+          "tooltip": "You can choose to send emails in plain text, rich text, or email template format",
+          "onchange": {
+            "Plain Text": [
+              {
+                "title": "Subject",
+                "name": "subject",
+                "value": "",
+                "type": "text",
+                "visible": true,
+                "editable": true,
+                "required": false
+              },
+              {
+                "title": "Content",
+                "name": "content",
+                "value": "",
+                "type": "textarea",
+                "visible": true,
+                "editable": true,
+                "required": true
+              }
+            ],
+            "Rich Text": [
+              {
+                "title": "Subject",
+                "name": "subject",
+                "value": "",
+                "type": "text",
+                "visible": true,
+                "editable": true,
+                "required": false
+              },
+              {
+                "title": "Content",
+                "name": "content",
+                "value": "",
+                "type": "richtext",
+                "renderer_type": "html",
+                "visible": true,
+                "editable": true,
+                "required": true
+              }
+            ],
+            "Email Template": [
+              {
+                "title": "Email Template",
+                "name": "email_templates",
+                "type": "select",
+                "apiOperation": "get_email_templates",
+                "visible": true,
+                "editable": true,
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "title": "Attachment File Path",
+          "name": "file_path",
+          "tooltip": "Path to the file to be added as attachment. Use this if the file is present on the system",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "description": "(Optional) Specify the path of the file that you want to add as an attachment to the email you want to send.\nNOTE: Use this parameter if the file is present in your FortiSOAR system."
+        },
+        {
+          "title": "Attachment Name",
+          "tooltip": "File would be attached with this name to the email",
+          "name": "file_name",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "description": "(Optional) Specify the name that you want to give to the file when it is attached to the email you want to send."
+        },
+        {
+          "title": "Attachment IRI List",
+          "name": "iri_list",
+          "tooltip": "Record IRI of attachments to be added to the email. Could be either file or attachment IRI. Not required if File Path and Attachment Name are used instead",
+          "placeholder": "Array or comma-separated list of IRIs (i.e. record @id)",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "description": "(Optional) Specify an array or comma-separated list of record IRIs of attachments you want to add to the email you want to send. You can specify either a list of file IDs or attachment IRIs; not required if you have specified the attachment file name and file path."
+        }
+      ],
+      "output_schema": {
+        "status": "",
+        "message_id": "",
+        "from": "",
+        "subject": "",
+        "recipients": {
+          "to": [],
+          "cc": [],
+          "bcc": []
+        },
+        "attachments": [],
+        "accepted_count": 0
+      },
+      "enabled": true
+    },
+    {
+      "description": "Send Email",
+      "operation": "send_email",
+      "annotation": "send_email",
+      "title": "Send Email",
+      "parameters": [
+        {
+          "title": "To Recipients",
+          "description": "Email IDs of the members to whom you want to send the email message from the Exchange account. You must add the email IDs in the CSV or list format. For example, abc@xyz.com, def@lmn.comImportant: You must specify email ID(s) in at least one of the following fields: TO Recipients, CC Recipients, or BCC Recipients.",
+          "tooltip": "Email IDs of the members to whom you want to send the email message from the Exchange account. You must add the email IDs in the CSV or list format. For example, abc@xyz.com, def@lmn.comImportant: You must specify email ID(s) in at least one of the following fields: TO Recipients, CC Recipients, or BCC Recipients.",
+          "required": false,
+          "editable": true,
+          "visible": true,
+          "type": "text",
+          "name": "to_recipients"
+        },
+        {
+          "title": "Cc Recipients",
+          "tooltip": "Email IDs of the members to be added to the CC list of the email message that you want to send from the Exchange account. You must add the email IDs in the CSV or list format.",
+          "description": "Email IDs of the members to be added to the CC list of the email message that you want to send from the Exchange account. You must add the email IDs in the CSV or list format.",
+          "required": false,
+          "editable": true,
+          "visible": true,
+          "type": "text",
+          "name": "cc_recipients"
+        },
+        {
+          "title": "Bcc Recipients",
+          "tooltip": "Email IDs of the members to be added to the BCC list of the email message that you want to send from the Exchange account. You must add the email IDs in the CSV or list format.",
+          "description": "Email IDs of the members to be added to the BCC list of the email message that you want to send from the Exchange account. You must add the email IDs in the CSV or list format.",
+          "required": false,
+          "editable": true,
+          "visible": true,
+          "type": "text",
+          "name": "bcc_recipients"
+        },
+        {
+          "title": "Body",
+          "tooltip": "(Optional) Message or content of the email that you want to send from the Exchange account.",
+          "description": "(Optional) Message or content of the email that you want to send from the Exchange account.",
+          "required": false,
+          "editable": true,
+          "visible": true,
+          "type": "richtext",
+          "renderer_type": "html",
+          "name": "body"
+        },
+        {
+          "title": "Subject",
+          "name": "subject",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "description": "Specify the Subject to be added to the email you want to send."
+        },
+        {
+          "title": "Attachment IRI List",
+          "name": "iri_list",
+          "tooltip": "Record IRI of attachments to be added to the email. Could be either file or attachment IRI. Not required if File Path and Attachment Name are used instead",
+          "placeholder": "eg, ['/api/3/attachments/af759fd8-788b-4f06-bd96-d47f45c6aaad', '/api/3/files/5aa62445097df198058b4567']",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "description": "(Optional) Specify an array or comma-separated list of record IRIs of attachments you want to add to the email you want to send. You can specify either a list of file IDs or attachment IRIs; not required if you have specified the attachment file name and file path."
+        },
+        {
+          "title": "To",
+          "name": "to",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "CC",
+          "name": "cc",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "BCC",
+          "name": "bcc",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "From",
+          "name": "from",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Content",
+          "name": "content",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Content Type",
+          "name": "content_type",
+          "value": "text/plain",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Attachment File Path",
+          "name": "file_path",
+          "tooltip": "Path to the file under /tmp to be added as attachment. Use this if the file is present on the system",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Attachment Name",
+          "tooltip": "File would be attached with this name to the email",
+          "name": "file_name",
+          "value": "",
+          "type": "text",
+          "visible": false,
+          "editable": true,
+          "required": false
+        }
+      ],
+      "output_schema": {
+        "status": "",
+        "message_id": "",
+        "from": "",
+        "subject": "",
+        "recipients": {
+          "to": [],
+          "cc": [],
+          "bcc": []
+        },
+        "attachments": [],
+        "accepted_count": 0
+      },
+      "enabled": true,
+      "visible": true
+    },
+    {
+      "description": "Send Email With Rich Text Content (Deprecated)",
+      "operation": "send_richtext_email",
+      "annotation": "send_email",
+      "title": "Send Rich Text Email (Deprecated)",
+      "parameters": [
+        {
+          "title": "To",
+          "name": "to",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": true,
+          "tooltip": "Semicolon separated list of email addresses"
+        },
+        {
+          "title": "CC",
+          "name": "cc",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "tooltip": "Semicolon separated list of email addresses"
+        },
+        {
+          "title": "BCC",
+          "name": "bcc",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false,
+          "tooltip": "Semicolon separated list of email addresses"
+        },
+        {
+          "title": "From",
+          "name": "from",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Subject",
+          "name": "subject",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Content",
+          "name": "content",
+          "value": "",
+          "type": "richtext",
+          "renderer_type": "html",
+          "visible": true,
+          "editable": true,
+          "required": true
+        },
+        {
+          "title": "Attachment File Path",
+          "name": "file_path",
+          "tooltip": "Path to the file to be added as attachment. Use this if the file is present on the system",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Attachment Name",
+          "tooltip": "File would be attached with this name to the email",
+          "name": "file_name",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false
+        },
+        {
+          "title": "Attachment IRI List",
+          "name": "iri_list",
+          "tooltip": "Record IRI of attachments to be added to the email. Could be either file or attachment IRI. Not required if File Path and Attachment Name are used instead",
+          "placeholder": "eg, ['/api/3/attachments/af759fd8-788b-4f06-bd96-d47f45c6aaad', '/api/3/files/5aa62445097df198058b4567']",
+          "value": "",
+          "type": "text",
+          "visible": true,
+          "editable": true,
+          "required": false
+        }
+      ],
+      "output_schema": {
+        "status": "",
+        "message_id": "",
+        "from": "",
+        "subject": "",
+        "recipients": {
+          "to": [],
+          "cc": [],
+          "bcc": []
+        },
+        "attachments": [],
+        "accepted_count": 0
+      },
+      "enabled": true,
+      "visible": false
+    },
+    {
+      "operation": "get_users",
+      "title": "Get Users",
+      "description": "Get available Users",
+      "category": "investigation",
+      "annotation": "get_users",
+      "output_schema": {},
+      "enabled": true,
+      "visible": false,
+      "products": [
+        {
+          "name": "XF",
+          "supported": false
+        },
+        {
+          "name": "XF_AGENT",
+          "supported": false
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "operation": "get_teams",
+      "title": "Get Teams",
+      "description": "Get available teams",
+      "category": "investigation",
+      "annotation": "get_teams",
+      "output_schema": {},
+      "enabled": true,
+      "visible": false,
+      "products": [
+        {
+          "name": "XF",
+          "supported": false
+        },
+        {
+          "name": "XF_AGENT",
+          "supported": false
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "operation": "get_email_templates",
+      "title": "Get Email Templates",
+      "description": "Get available email templates",
+      "category": "investigation",
+      "annotation": "get_email_templates",
+      "output_schema": {},
+      "enabled": true,
+      "visible": false,
+      "products": [
+        {
+          "name": "XF",
+          "supported": false
+        },
+        {
+          "name": "XF_AGENT",
+          "supported": false
+        }
+      ],
+      "parameters": []
+    }
+  ]
+}

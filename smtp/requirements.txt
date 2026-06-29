@@ -1,0 +1,4 @@
+# Send path uses only the Python stdlib (smtplib, email) — no Django.
+pydantic>=2.0
+beautifulsoup4>=4.11
+jinja2>=3.0
