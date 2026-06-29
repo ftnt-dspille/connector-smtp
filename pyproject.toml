@@ -1,3 +1,12 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Only the connector package is installable; harness/ and tests/ are dev-only,
+# so disable setuptools' flat-layout auto-discovery (which trips on them).
+packages = ["smtp"]
+
 [project]
 name = "connector-smtp"
 version = "3.0.0"
