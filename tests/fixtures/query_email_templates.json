@@ -1,0 +1,17 @@
+{
+  "@context": "/api/3/contexts/EmailTemplate",
+  "@id": "/api/3/email_templates",
+  "@type": "hydra:Collection",
+  "hydra:member": [
+    {
+      "@id": "/api/3/email_templates/12f23d8d-505c-4b4b-8911-6595c99b07f0",
+      "@type": "EmailTemplate",
+      "name": "System: Send email to new user",
+      "subject": "FortiSOAR password reset",
+      "content": "<p>Hello,</p><p>An administrator has requested a password reset for the FortiSOAR\u2122 account with user ID <strong>{{vars.userId}}</strong>. To create a new password, click the following link:</p><p><a title='login link' href='{{@Server_fqhn}}/login/{{vars.token}}?view=passwdreset'>{{@Server_fqhn}}</a></p><p>The above link is valid for 1 hour. If the link expires, please request a new link from your administrator.</p><p>Regards,</p><p>FortiSOAR\u2122 Admin.</p>",
+      "visible": null,
+      "uuid": "12f23d8d-505c-4b4b-8911-6595c99b07f0"
+    }
+  ],
+  "hydra:totalItems": 1
+}

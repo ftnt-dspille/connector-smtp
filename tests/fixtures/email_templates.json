@@ -1,0 +1,57 @@
+{
+  "@context": "/api/3/contexts/EmailTemplate",
+  "@id": "/api/3/email_templates",
+  "@type": "hydra:Collection",
+  "hydra:member": [
+    {
+      "@id": "/api/3/email_templates/12f23d8d-505c-4b4b-8911-6595c99b07f0",
+      "@type": "EmailTemplate",
+      "name": "System: Send email to new user",
+      "subject": "FortiSOAR password reset",
+      "content": "<p>Hello,</p><p>An administrator has requested a password reset for the FortiSOAR\u2122 account with user ID <strong>{{vars.userId}}</strong>. To create a new password, click the following link:</p><p><a title='login link' href='{{@Server_fqhn}}/login/{{vars.token}}?view=passwdreset'>{{@Server_fqhn}}</a></p><p>The above link is valid for 1 hour. If the link expires, please request a new link from your administrator.</p><p>Regards,</p><p>FortiSOAR\u2122 Admin.</p>",
+      "visible": null,
+      "uuid": "12f23d8d-505c-4b4b-8911-6595c99b07f0"
+    },
+    {
+      "@id": "/api/3/email_templates/2218f5b9-0b17-4f21-91c9-5404696d1908",
+      "@type": "EmailTemplate",
+      "name": "System: Send email for reset password by admin",
+      "subject": "FortiSOAR password reset",
+      "content": "<p>Hello,</p>\n<p>An administrator has requested a password change for your FortiSOAR\u2122 account with user ID <strong>{{vars.userId}}</strong>. To get your new password, please contact an administrator.</p>\n<p>Regards,</p>\n<p>FortiSOAR\u2122 Admin.</p>",
+      "visible": null,
+      "uuid": "2218f5b9-0b17-4f21-91c9-5404696d1908"
+    },
+    {
+      "@id": "/api/3/email_templates/b9265a6e-7c0d-420a-a8e9-e77f01baf7cb",
+      "@type": "EmailTemplate",
+      "name": "System: Send Email on forgot password",
+      "subject": "FortiSOAR password reset",
+      "content": "<p>Hello,</p><p>A password reset has been requested for your FortiSOAR\u2122 account with user ID <strong>{{vars.userId}}</strong>. To create a new password, click the following link:</p><p><a title='login link' href='{{@Server_fqhn}}/login/{{vars.token}}?view=passwdreset'>{{@Server_fqhn}}</a></p><p>The above link is valid for 1 hour. Attempting to use your old password might result in your account being locked. If you did not send the password reset request, then please ignore this.</p><p>Regards,</p><p>FortiSOAR\u2122 Admin.</p>",
+      "visible": null,
+      "uuid": "b9265a6e-7c0d-420a-a8e9-e77f01baf7cb"
+    },
+    {
+      "@id": "/api/3/email_templates/e71ba2df-e4ed-4823-9c28-b86423e9a7eb",
+      "@type": "EmailTemplate",
+      "name": "System: Send email for password change",
+      "subject": "FortiSOAR password changed",
+      "content": "<p>Hello,</p>\n<p>The password for your FortiSOAR\u2122 account with user ID <strong>{{vars.userId}}</strong> has changed. If you did not initiate this change, please contact your administrator.</p>\n<p>Regards,</p>\n<p>FortiSOAR\u2122 Admin.</p>",
+      "visible": null,
+      "uuid": "e71ba2df-e4ed-4823-9c28-b86423e9a7eb"
+    },
+    {
+      "@id": "/api/3/email_templates/e736eb31-bc42-4e8c-b9e2-d99ccdd4ee8b",
+      "@type": "EmailTemplate",
+      "name": "System: Send email for non-FSR user manual input",
+      "subject": "A FortiSOAR playbook is requesting your input",
+      "content": "<p>Hello,</p>\n<p>A FortiSOAR\u2122 playbook is requesting your input. Please provide your input using the following link:</p>\n<p><a href='{{url}}'>Open input form</a></p><p>Alternatively, copy/paste this in your browser:<br />{{url}}</p><p>Regards,</p>\n<p>FortiSOAR\u2122 Admin.</p>",
+      "visible": null,
+      "uuid": "e736eb31-bc42-4e8c-b9e2-d99ccdd4ee8b"
+    }
+  ],
+  "hydra:totalItems": 5,
+  "hydra:view": {
+    "@id": "/api/3/email_templates?%24limit=25",
+    "@type": "hydra:PartialCollectionView"
+  }
+}
