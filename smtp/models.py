@@ -91,6 +91,56 @@ class SendEmailParams(BaseModel):
         return self.body_type in (BodyType.rich, BodyType.template)
 
 
+# --------------------------------------------------------------------------- #
+# Inbound FortiSOAR API shapes (only the fields the connector reads). Validated
+# against real responses captured from fsr130 in tests/fixtures/. Kept slim and
+# local so the connector stays free of a pyfsr runtime dependency.
+# --------------------------------------------------------------------------- #
+class PersonRef(BaseModel):
+    """A `/api/3/people` record (pyfsr calls this `User`)."""
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    id_iri: str | None = Field(default=None, alias="@id")
+    uuid: str | None = None
+    firstname: str | None = None
+    lastname: str | None = None
+    email: str | None = None
+
+    @property
+    def display(self) -> str:
+        return f"{self.firstname or ''} {self.lastname or ''} {self.email or ''}".strip()
+
+
+class TeamRef(BaseModel):
+    """A `/api/3/teams` record. With `$relationships=true`, `actors` come back as
+    expanded people dicts; without it they're IRI strings — both are handled."""
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    id_iri: str | None = Field(default=None, alias="@id")
+    uuid: str | None = None
+    name: str | None = None
+    actors: list = Field(default_factory=list)  # list[PersonRef | str(IRI)]
+
+    @field_validator("actors", mode="before")
+    @classmethod
+    def _parse_actors(cls, v):
+        out = []
+        for a in v or []:
+            out.append(PersonRef.model_validate(a) if isinstance(a, dict) else a)
+        return out
+
+
+class EmailTemplateRef(BaseModel):
+    """An `/api/3/email_templates` record (pyfsr has no model for this)."""
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    id_iri: str | None = Field(default=None, alias="@id")
+    uuid: str | None = None
+    name: str | None = None
+    subject: str = ""
+    content: str = ""
+
+
 class Recipients(BaseModel):
     to: list[str] = Field(default_factory=list)
     cc: list[str] = Field(default_factory=list)

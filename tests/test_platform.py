@@ -5,9 +5,30 @@ Covers the logic that can't run off-box without an appliance: get_users/
 get_teams/get_email_templates, Team & people-IRI recipient resolution, and
 Email Template body expansion."""
 from smtp import operations
+from smtp.models import PersonRef, TeamRef, EmailTemplateRef
 from tests.conftest import load_fixture
 
 EMAIL = "@"
+
+
+def test_personref_parses_real_people_fixture():
+    p = PersonRef.model_validate(load_fixture("people.json")["hydra:member"][0])
+    assert p.email and p.id_iri.startswith("/api/3/people/")
+    assert p.display.endswith(p.email)
+
+
+def test_teamref_parses_expanded_actors():
+    soc = next(t for t in load_fixture("teams_rel.json")["hydra:member"] if t["name"] == "SOC Team")
+    team = TeamRef.model_validate(soc)
+    assert team.name == "SOC Team"
+    # $relationships=true -> actors parsed into PersonRef objects with emails
+    assert team.actors and all(isinstance(a, PersonRef) for a in team.actors)
+    assert any(a.email for a in team.actors)
+
+
+def test_emailtemplateref_parses_subject_and_content():
+    tpl = EmailTemplateRef.model_validate(load_fixture("query_email_templates.json")["hydra:member"][0])
+    assert tpl.name and isinstance(tpl.subject, str) and isinstance(tpl.content, str)
 
 
 def test_get_users_formats_from_real_people(fsr_api):

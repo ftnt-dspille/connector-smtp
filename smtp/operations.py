@@ -10,7 +10,10 @@ from os.path import basename, join
 
 from . import platform
 from .config import SMTPConfig
-from .models import BodyType, RecipientType, SendEmailParams, SendResult, Recipients, to_list
+from .models import (
+    BodyType, RecipientType, SendEmailParams, SendResult, Recipients,
+    PersonRef, TeamRef, EmailTemplateRef,
+)
 from .transport import SMTPTransport, build_message
 
 logger = logging.getLogger("connectors.smtp")
@@ -52,31 +55,33 @@ def _resolve_manual(entries: list[str]) -> list[str]:
 def _emails_for_people_uuids(uuids: list[str]) -> list[str]:
     body = {"logic": "OR", "filters": [{"field": "uuid", "operator": "eq", "value": u} for u in uuids]}
     resp = platform.make_request("/api/query/people", "POST", body=body)["hydra:member"]
-    return [u["email"] for u in resp if u.get("email")]
+    people = [PersonRef.model_validate(p) for p in resp]
+    return [p.email for p in people if p.email]
 
 
 def _emails_for_team_uuids(uuids: list[str]) -> list[str]:
     body = {"logic": "OR", "filters": [{"field": "uuid", "operator": "eq", "value": u} for u in uuids]}
     resp = platform.make_request("/api/query/teams?$relationships=true", "POST", body=body)["hydra:member"]
-    return _emails_from_team_records(resp)
+    return _emails_from_team_records([TeamRef.model_validate(t) for t in resp])
 
 
 def _emails_for_teams(team_names: list[str]) -> list[str]:
     if not team_names:
         return []
     resp = platform.make_request("/api/3/teams?$relationships=true", "GET")["hydra:member"]
-    wanted = {t["name"]: t for t in resp if t["name"] in set(team_names)}
-    return _emails_from_team_records(list(wanted.values()))
+    teams = [TeamRef.model_validate(t) for t in resp]
+    wanted = [t for t in teams if t.name in set(team_names)]
+    return _emails_from_team_records(wanted)
 
 
-def _emails_from_team_records(teams: list[dict]) -> list[str]:
+def _emails_from_team_records(teams: list[TeamRef]) -> list[str]:
     emails, uuids = set(), []
     for team in teams:
-        for actor in team.get("actors", []):
-            if isinstance(actor, str):
+        for actor in team.actors:
+            if isinstance(actor, str):  # IRI string -> needs a follow-up lookup
                 uuids.append(actor.rsplit("/", 1)[-1])
-            elif actor.get("email"):
-                emails.add(actor["email"])
+            elif actor.email:           # expanded PersonRef (from $relationships=true)
+                emails.add(actor.email)
     if uuids:
         emails.update(_emails_for_people_uuids(uuids))
     return sorted(emails)
@@ -125,7 +130,8 @@ def _apply_template(p: SendEmailParams, env: dict) -> tuple[str, str]:
     resp = platform.make_request("/api/query/email_templates", "POST", body=body)["hydra:member"]
     if not resp:
         raise ValueError(f"Email template not found: {p.email_templates}")
-    return platform.expand(env, resp[0]["subject"]), platform.expand(env, resp[0]["content"])
+    tpl = EmailTemplateRef.model_validate(resp[0])
+    return platform.expand(env, tpl.subject), platform.expand(env, tpl.content)
 
 
 # --------------------------------------------------------------------------- #
@@ -189,12 +195,12 @@ def check_health(config: dict, params: dict | None = None) -> bool:
 
 def get_users(config: dict, params: dict) -> list[str]:
     resp = platform.make_request("/api/3/people?$limit=1000", "GET")["hydra:member"]
-    return [f"{u.get('firstname','')} {u.get('lastname','')} {u.get('email','')}".strip() for u in resp]
+    return [PersonRef.model_validate(u).display for u in resp]
 
 
 def get_teams(config: dict, params: dict) -> list[str]:
     resp = platform.make_request("/api/3/teams?$limit=1000", "GET")["hydra:member"]
-    return [t["name"] for t in resp]
+    return [TeamRef.model_validate(t).name for t in resp]
 
 
 def get_email_templates(config: dict, params: dict) -> list[str]:
