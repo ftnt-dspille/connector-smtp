@@ -4,8 +4,9 @@ from fsr130 (tests/fixtures/*.json) and replayed via the fsr_api fixture.
 Covers the logic that can't run off-box without an appliance: get_users/
 get_teams/get_email_templates, Team & people-IRI recipient resolution, and
 Email Template body expansion."""
+
 from smtp import operations
-from smtp.models import PersonRef, TeamRef, EmailTemplateRef
+from smtp.models import EmailTemplateRef, PersonRef, TeamRef
 from tests.conftest import load_fixture
 
 EMAIL = "@"
@@ -64,9 +65,10 @@ def test_team_recipient_resolution_expands_to_member_emails(fsr_api, smtp_server
     soc = next(t for t in members if t["name"] == "SOC Team")
     expected = sorted({a["email"] for a in soc["actors"] if isinstance(a, dict) and a.get("email")})
 
-    result = operations.send_email_new(smtp_config, {
-        "type": "Team", "to": ["SOC Team"], "subject": "team", "content": "x",
-        "body_type": "Plain Text"})
+    result = operations.send_email_new(
+        smtp_config,
+        {"type": "Team", "to": ["SOC Team"], "subject": "team", "content": "x", "body_type": "Plain Text"},
+    )
 
     assert sorted(result["recipients"]["to"]) == expected
     assert expected and EMAIL in expected[0]
@@ -76,17 +78,24 @@ def test_team_recipient_resolution_expands_to_member_emails(fsr_api, smtp_server
 def test_manual_people_iri_resolves_to_email(fsr_api, smtp_server, smtp_config):
     person = load_fixture("query_people.json")["hydra:member"][0]
     iri = person["@id"]
-    result = operations.send_email_new(smtp_config, {
-        "type": "Manual Input", "to": iri, "subject": "iri", "content": "x",
-        "body_type": "Plain Text"})
+    result = operations.send_email_new(
+        smtp_config,
+        {"type": "Manual Input", "to": iri, "subject": "iri", "content": "x", "body_type": "Plain Text"},
+    )
     assert result["recipients"]["to"] == [person["email"]]
 
 
 def test_email_template_body_is_applied(fsr_api, smtp_server, smtp_config):
     tpl = load_fixture("query_email_templates.json")["hydra:member"][0]
-    result = operations.send_email_new(smtp_config, {
-        "type": "Manual Input", "to": "x@local.test", "body_type": "Email Template",
-        "email_templates": tpl["name"]})
+    result = operations.send_email_new(
+        smtp_config,
+        {
+            "type": "Manual Input",
+            "to": "x@local.test",
+            "body_type": "Email Template",
+            "email_templates": tpl["name"],
+        },
+    )
     assert result["status"] == "sent"
     # subject came from the template (off-box expand() is identity)
     assert result["subject"] == tpl["subject"]

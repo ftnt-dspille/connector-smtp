@@ -1,18 +1,24 @@
 """Tests against a real in-process SMTP server (aiosmtpd) — exercises the full
 stdlib transport, message building, and structured result. The smtp_server /
 smtp_config fixtures live in conftest.py."""
+
 import pytest
 
 from smtp import operations
 from smtp.config import SMTPConfig
 from smtp.models import SendEmailParams
-from smtp.transport import build_message, extract_inline_images
+from smtp.transport import extract_inline_images
 
 
 def test_send_email_new_returns_structured_result(smtp_server, smtp_config):
     _, sink = smtp_server
-    params = {"type": "Manual Input", "to": "a@local.test, b@local.test",
-              "subject": "hi", "body_type": "Plain Text", "content": "hello"}
+    params = {
+        "type": "Manual Input",
+        "to": "a@local.test, b@local.test",
+        "subject": "hi",
+        "body_type": "Plain Text",
+        "content": "hello",
+    }
     result = operations.send_email_new(smtp_config, params)
 
     assert result["status"] == "sent"
@@ -26,12 +32,17 @@ def test_send_email_new_returns_structured_result(smtp_server, smtp_config):
 
 def test_bcc_is_delivered_but_stripped_from_headers(smtp_server, smtp_config):
     _, sink = smtp_server
-    params = {"to": "a@local.test", "bcc": "secret@local.test",
-              "subject": "s", "body_type": "Plain Text", "content": "x"}
+    params = {
+        "to": "a@local.test",
+        "bcc": "secret@local.test",
+        "subject": "s",
+        "body_type": "Plain Text",
+        "content": "x",
+    }
     result = operations.send_email_new(smtp_config, params)
     env = sink.messages[0]
-    assert "secret@local.test" in env.rcpt_tos          # delivered
-    assert b"secret@local.test" not in env.content      # not in headers
+    assert "secret@local.test" in env.rcpt_tos  # delivered
+    assert b"secret@local.test" not in env.content  # not in headers
     assert result["accepted_count"] == 2
 
 

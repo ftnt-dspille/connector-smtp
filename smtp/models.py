@@ -7,6 +7,7 @@ semicolon-separated strings, lists, single IRIs) into clean typed fields.
 
 `SendResult` is the structured value every send operation now returns — this is
 the headline improvement over the legacy connector, which returned None."""
+
 from __future__ import annotations
 
 import re
@@ -42,6 +43,7 @@ class BodyType(str, Enum):
 class SendEmailParams(BaseModel):
     """Normalized inputs for a send operation. Accepts the legacy field names
     (to_recipients/cc_recipients/bcc_recipients/body) as aliases."""
+
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     recipient_type: RecipientType = Field(default=RecipientType.manual, alias="type")
@@ -72,7 +74,7 @@ class SendEmailParams(BaseModel):
         return "" if v is None else str(v)
 
     @classmethod
-    def from_params(cls, params: dict) -> "SendEmailParams":
+    def from_params(cls, params: dict) -> SendEmailParams:
         """Build from the raw FortiSOAR params, honoring legacy aliases:
         to_recipients/cc_recipients/bcc_recipients -> to/cc/bcc, body -> content."""
         p = dict(params or {})
@@ -98,6 +100,7 @@ class SendEmailParams(BaseModel):
 # --------------------------------------------------------------------------- #
 class PersonRef(BaseModel):
     """A `/api/3/people` record (pyfsr calls this `User`)."""
+
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     id_iri: str | None = Field(default=None, alias="@id")
@@ -114,6 +117,7 @@ class PersonRef(BaseModel):
 class TeamRef(BaseModel):
     """A `/api/3/teams` record. With `$relationships=true`, `actors` come back as
     expanded people dicts; without it they're IRI strings — both are handled."""
+
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     id_iri: str | None = Field(default=None, alias="@id")
@@ -132,6 +136,7 @@ class TeamRef(BaseModel):
 
 class EmailTemplateRef(BaseModel):
     """An `/api/3/email_templates` record (pyfsr has no model for this)."""
+
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     id_iri: str | None = Field(default=None, alias="@id")
@@ -149,6 +154,7 @@ class Recipients(BaseModel):
 
 class SendResult(BaseModel):
     """Structured return value for send operations."""
+
     model_config = ConfigDict(populate_by_name=True)
 
     status: str = "sent"

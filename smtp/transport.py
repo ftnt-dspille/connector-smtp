@@ -5,6 +5,7 @@
 (plain text, HTML alternative, inline images, attachments). `SMTPTransport`
 opens the connection (STARTTLS / implicit SSL / plain, with optional auth) and
 sends or just verifies it."""
+
 from __future__ import annotations
 
 import base64
@@ -23,6 +24,7 @@ def html_to_text(html: str) -> str:
         return ""
     try:
         from bs4 import BeautifulSoup
+
         return BeautifulSoup(html, "html.parser").get_text(separator=" ", strip=True)
     except Exception:
         # Fallback: crude tag strip
@@ -50,9 +52,17 @@ def extract_inline_images(html: str):
     return rewritten, images
 
 
-def build_message(*, from_addr: str, to: list[str], cc: list[str], bcc: list[str],
-                  subject: str, content: str, is_html: bool,
-                  attachments: list[tuple[str, bytes]] | None = None) -> EmailMessage:
+def build_message(
+    *,
+    from_addr: str,
+    to: list[str],
+    cc: list[str],
+    bcc: list[str],
+    subject: str,
+    content: str,
+    is_html: bool,
+    attachments: list[tuple[str, bytes]] | None = None,
+) -> EmailMessage:
     """Construct an EmailMessage. attachments: list of (filename, raw_bytes)."""
     msg = EmailMessage()
     msg["From"] = from_addr
@@ -69,15 +79,15 @@ def build_message(*, from_addr: str, to: list[str], cc: list[str], bcc: list[str
     inline = []
     if is_html:
         html, inline = extract_inline_images(content)
-        msg.set_content(html_to_text(html))           # text/plain alternative
-        msg.add_alternative(html, subtype="html")      # text/html
+        msg.set_content(html_to_text(html))  # text/plain alternative
+        msg.add_alternative(html, subtype="html")  # text/html
         html_part = msg.get_payload()[-1]
         for cid, subtype, raw in inline:
             html_part.add_related(raw, maintype="image", subtype=subtype, cid=f"<{cid}>")
     else:
         msg.set_content(content)
 
-    for filename, raw in (attachments or []):
+    for filename, raw in attachments or []:
         msg.add_attachment(raw, maintype="application", subtype="octet-stream", filename=filename)
 
     return msg
@@ -90,8 +100,7 @@ class SMTPTransport:
     def _connect(self) -> smtplib.SMTP:
         c = self.config
         if c.use_ssl:
-            server = smtplib.SMTP_SSL(c.host, c.port, timeout=c.timeout,
-                                      context=ssl.create_default_context())
+            server = smtplib.SMTP_SSL(c.host, c.port, timeout=c.timeout, context=ssl.create_default_context())
         else:
             server = smtplib.SMTP(c.host, c.port, timeout=c.timeout)
             if c.use_tls:

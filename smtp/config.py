@@ -3,6 +3,7 @@
 passes to every operation). Accepts both the FortiSOAR field names (useTLS,
 useSSL) and snake_case, coerces the string port to int, and validates that TLS
 and SSL aren't both requested."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -42,7 +43,7 @@ class SMTPConfig(BaseModel):
         return self
 
     @classmethod
-    def from_connector_config(cls, config: dict) -> "SMTPConfig":
+    def from_connector_config(cls, config: dict) -> SMTPConfig:
         """Build from the raw FortiSOAR config dict, defaulting timeout sanely."""
         data = dict(config or {})
         if not data.get("timeout"):

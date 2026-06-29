@@ -2,11 +2,17 @@
 """FortiSOAR Connector adapter. Thin: maps operation names to functions in
 operations.py and delegates. All real logic lives in the pydantic-typed,
 Django-free modules."""
+
 from connectors.core.connector import Connector, get_logger
 
 from .operations import (
-    send_email, send_email_new, send_richtext_email,
-    get_users, get_teams, get_email_templates, check_health,
+    check_health,
+    get_email_templates,
+    get_teams,
+    get_users,
+    send_email,
+    send_email_new,
+    send_richtext_email,
 )
 
 logger = get_logger("connectors.smtp")

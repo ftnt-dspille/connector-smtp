@@ -15,6 +15,7 @@ Zero-setup local sink (another terminal):
     python -m aiosmtpd -n -d -l localhost:1025
 then HOST=localhost PORT=1025 USE_TLS=false in .env.
 """
+
 import argparse
 import os
 import sys
@@ -29,22 +30,26 @@ load_dotenv(ROOT / ".env")
 
 
 def _stub_connector_base():
-    pkg = types.ModuleType("connectors"); pkg.__path__ = []
-    core = types.ModuleType("connectors.core"); core.__path__ = []
+    pkg = types.ModuleType("connectors")
+    pkg.__path__ = []
+    core = types.ModuleType("connectors.core")
+    core.__path__ = []
     conn = types.ModuleType("connectors.core.connector")
 
     class Connector:  # noqa
         pass
 
     import logging
+
     conn.Connector = Connector
     conn.get_logger = logging.getLogger
-    sys.modules.update({"connectors": pkg, "connectors.core": core,
-                        "connectors.core.connector": conn})
+    sys.modules.update({"connectors": pkg, "connectors.core": core, "connectors.core.connector": conn})
 
 
 def build_config():
-    b = lambda v: str(v).strip().lower() in ("1", "true", "yes", "on")
+    def b(v):
+        return str(v).strip().lower() in ("1", "true", "yes", "on")
+
     if not os.environ.get("HOST"):
         sys.exit("ERROR: HOST not set — copy .env.example to .env and edit it.")
     return {
@@ -62,7 +67,9 @@ def build_config():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--health", action="store_true")
-    ap.add_argument("--to"); ap.add_argument("--cc", default=""); ap.add_argument("--bcc", default="")
+    ap.add_argument("--to")
+    ap.add_argument("--cc", default="")
+    ap.add_argument("--bcc", default="")
     ap.add_argument("--from", dest="from_", default="")
     ap.add_argument("--subject", default="SMTP connector local test")
     ap.add_argument("--body", default="<h3>It works</h3>")
@@ -75,8 +82,10 @@ def main():
 
     config = build_config()
     conn = SMTP()
-    print(f"Config: host={config['host']} port={config['port']} "
-          f"useTLS={config['useTLS']} useSSL={config['useSSL']} from={config['default_from'] or '(none)'}")
+    print(
+        f"Config: host={config['host']} port={config['port']} "
+        f"useTLS={config['useTLS']} useSSL={config['useSSL']} from={config['default_from'] or '(none)'}"
+    )
 
     print("\n== check_health ==")
     try:
@@ -91,12 +100,18 @@ def main():
     if not args.to:
         sys.exit("ERROR: --to required (or use --health).")
     params = {
-        "type": "Manual Input", "to": args.to, "cc": args.cc, "bcc": args.bcc,
-        "from": args.from_, "subject": args.subject,
-        "body_type": "Plain Text" if args.plain else "Rich Text", "content": args.body,
+        "type": "Manual Input",
+        "to": args.to,
+        "cc": args.cc,
+        "bcc": args.bcc,
+        "from": args.from_,
+        "subject": args.subject,
+        "body_type": "Plain Text" if args.plain else "Rich Text",
+        "content": args.body,
     }
     print(f"\n== {args.op} ==")
     import json
+
     print(json.dumps(conn.execute(config, args.op, params, env={}), indent=2))
 
 

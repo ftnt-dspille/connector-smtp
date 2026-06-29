@@ -1,6 +1,7 @@
 """Shared fixtures: an in-process SMTP server (aiosmtpd) and a replay router
 that serves real FortiSOAR API responses captured from a live appliance
 (fsr130) into tests/fixtures/*.json."""
+
 import json
 import socket
 from pathlib import Path
@@ -46,8 +47,13 @@ def smtp_server():
 @pytest.fixture
 def smtp_config(smtp_server):
     controller, _ = smtp_server
-    return {"host": "127.0.0.1", "port": controller._real_port, "useTLS": False,
-            "default_from": "from@local.test", "timeout": 10}
+    return {
+        "host": "127.0.0.1",
+        "port": controller._real_port,
+        "useTLS": False,
+        "default_from": "from@local.test",
+        "timeout": 10,
+    }
 
 
 @pytest.fixture

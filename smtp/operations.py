@@ -1,6 +1,7 @@
 # Copyright (C) 2025 Fortinet Inc. — MIT License
 """Operation implementations. Each send op returns a SendResult.as_output()
 dict — the structured return value the legacy connector lacked."""
+
 from __future__ import annotations
 
 import logging
@@ -11,8 +12,14 @@ from os.path import basename, join
 from . import platform
 from .config import SMTPConfig
 from .models import (
-    BodyType, RecipientType, SendEmailParams, SendResult, Recipients,
-    PersonRef, TeamRef, EmailTemplateRef,
+    BodyType,
+    EmailTemplateRef,
+    PersonRef,
+    Recipients,
+    RecipientType,
+    SendEmailParams,
+    SendResult,
+    TeamRef,
 )
 from .transport import SMTPTransport, build_message
 
@@ -28,7 +35,9 @@ TMP_ROOT = os.environ.get("SMTP_TMP_ROOT", "/tmp")
 def _resolve_recipients(p: SendEmailParams) -> tuple[list[str], list[str], list[str]]:
     if p.recipient_type == RecipientType.user:
         # UI sends "First Last email@x" strings; take the last token (email).
-        pick = lambda lst: [u.split()[-1] for u in lst if u.split()]
+        def pick(lst):
+            return [u.split()[-1] for u in lst if u.split()]
+
         return pick(p.to), pick(p.cc), pick(p.bcc)
     if p.recipient_type == RecipientType.team:
         return (_emails_for_teams(p.to), _emails_for_teams(p.cc), _emails_for_teams(p.bcc))
@@ -80,7 +89,7 @@ def _emails_from_team_records(teams: list[TeamRef]) -> list[str]:
         for actor in team.actors:
             if isinstance(actor, str):  # IRI string -> needs a follow-up lookup
                 uuids.append(actor.rsplit("/", 1)[-1])
-            elif actor.email:           # expanded PersonRef (from $relationships=true)
+            elif actor.email:  # expanded PersonRef (from $relationships=true)
                 emails.add(actor.email)
     if uuids:
         emails.update(_emails_for_people_uuids(uuids))
@@ -95,7 +104,7 @@ def _collect_attachments(p: SendEmailParams, env: dict) -> list[tuple[str, bytes
     if p.file_path:
         path = p.file_path.strip()
         if path.startswith(TMP_ROOT):
-            path = path[len(TMP_ROOT):].lstrip("/")
+            path = path[len(TMP_ROOT) :].lstrip("/")
         full = join(TMP_ROOT, path)
         _check_traversal(full)
         name = p.file_name or basename(full)
@@ -155,18 +164,28 @@ def _send(config: dict, params: SendEmailParams, env: dict) -> dict:
         raise ValueError("No 'From' address: set a valid From or configure Default From")
 
     attachments = _collect_attachments(params, env)
-    msg = build_message(from_addr=from_addr, to=to, cc=cc, bcc=bcc,
-                        subject=subject, content=content, is_html=params.is_html,
-                        attachments=attachments)
+    msg = build_message(
+        from_addr=from_addr,
+        to=to,
+        cc=cc,
+        bcc=bcc,
+        subject=subject,
+        content=content,
+        is_html=params.is_html,
+        attachments=attachments,
+    )
     try:
         SMTPTransport(cfg).send(msg)
     except Exception as e:
         logger.exception("Error sending email")
-        raise ValueError(f"Error sending email: {e}")
+        raise ValueError(f"Error sending email: {e}") from e
 
     return SendResult(
-        status="sent", message_id=msg["Message-ID"], **{"from": from_addr},
-        subject=subject, recipients=Recipients(to=to, cc=cc, bcc=bcc),
+        status="sent",
+        message_id=msg["Message-ID"],
+        **{"from": from_addr},
+        subject=subject,
+        recipients=Recipients(to=to, cc=cc, bcc=bcc),
         attachments=[name for name, _ in attachments],
         accepted_count=len(to) + len(cc) + len(bcc),
     ).as_output()
