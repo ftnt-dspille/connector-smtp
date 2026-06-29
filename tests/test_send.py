@@ -4,10 +4,10 @@ smtp_config fixtures live in conftest.py."""
 
 import pytest
 
-from smtp import operations
-from smtp.config import SMTPConfig
-from smtp.models import SendEmailParams
-from smtp.transport import extract_inline_images
+from smtp_ng import operations
+from smtp_ng.config import SMTPConfig
+from smtp_ng.models import SendEmailParams
+from smtp_ng.transport import extract_inline_images
 
 
 def test_send_email_new_returns_structured_result(smtp_server, smtp_config):

@@ -58,9 +58,9 @@ def smtp_config(smtp_server):
 
 @pytest.fixture
 def fsr_api(monkeypatch):
-    """Replace smtp.platform.make_request with a router over the captured
+    """Replace smtp_ng.platform.make_request with a router over the captured
     fixtures. Routes by (method, endpoint-prefix), mirroring the real calls."""
-    from smtp import platform
+    from smtp_ng import platform
 
     def router(endpoint, method, **kwargs):
         m = method.upper()

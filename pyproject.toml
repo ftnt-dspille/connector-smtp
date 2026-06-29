@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 # Only the connector package is installable; harness/ and tests/ are dev-only,
 # so disable setuptools' flat-layout auto-discovery (which trips on them).
-packages = ["smtp"]
+packages = ["smtp_ng"]
 
 [project]
-name = "connector-smtp"
-version = "3.0.0"
-description = "FortiSOAR SMTP connector — stdlib smtplib, pydantic-validated, structured results."
+name = "connector-smtp-ng"
+version = "1.0.0"
+description = "FortiSOAR SMTP (Next-Gen) connector — stdlib smtplib, pydantic-validated, structured results."
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = ["pydantic>=2.0", "beautifulsoup4>=4.11", "jinja2>=3.0"]

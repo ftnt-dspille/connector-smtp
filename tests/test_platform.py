@@ -5,8 +5,8 @@ Covers the logic that can't run off-box without an appliance: get_users/
 get_teams/get_email_templates, Team & people-IRI recipient resolution, and
 Email Template body expansion."""
 
-from smtp import operations
-from smtp.models import EmailTemplateRef, PersonRef, TeamRef
+from smtp_ng import operations
+from smtp_ng.models import EmailTemplateRef, PersonRef, TeamRef
 from tests.conftest import load_fixture
 
 EMAIL = "@"

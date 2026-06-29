@@ -1,6 +1,7 @@
-# connector-smtp
+# connector-smtp-ng
 
-A reworked FortiSOAR **SMTP** connector: same actions as the stock connector, but
+A reworked FortiSOAR SMTP connector — **SMTP (Next-Gen)**, `name: smtp_ng` (the
+stock `smtp` is a system connector whose name can't be reused). Same actions, but
 Django-free, **pydantic-validated**, and every send operation now returns a
 **structured result** instead of `None`.
 
@@ -27,7 +28,7 @@ All dependencies are permissive: pydantic (MIT), beautifulsoup4 (MIT), Jinja2 (B
 ## Layout
 
 ```
-smtp/                 # the FortiSOAR connector package (FSR loads smtp.connector)
+smtp_ng/              # the FortiSOAR connector package (FSR loads smtp_ng.connector)
   info.json           # manifest: config fields (+ Use SSL), operations, output_schema
   connector.py        # thin Connector adapter (execute / check_health)
   operations.py       # action implementations, return SendResult

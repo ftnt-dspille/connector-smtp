@@ -78,7 +78,7 @@ def main():
     args = ap.parse_args()
 
     _stub_connector_base()
-    from smtp.connector import SMTP
+    from smtp_ng.connector import SMTP
 
     config = build_config()
     conn = SMTP()
