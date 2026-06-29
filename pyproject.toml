@@ -20,6 +20,9 @@ dev = ["pytest>=7", "aiosmtpd>=1.4", "python-dotenv>=1.0", "ruff>=0.6"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Put the repo root on sys.path so `from tests.conftest import ...` resolves
+# regardless of how pytest is invoked (bare `pytest` vs `python -m pytest`).
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 110
